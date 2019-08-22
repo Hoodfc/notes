@@ -94,9 +94,13 @@ An application-layer protocol defines how an application's processes, on differe
 
 Some application-layer protocols are specified in **RFC** and therefore available in the public domain. Two examples are the **HTTP** (RFC 2616) and the **SMTP** (RFC 5321). The first is the app-layer protocol for the Web; the second for internet email applications.
 
+---
+
 # 2.2 The Web and HTTP
 
 Until the 1990s, the Internet was only used in academics fields, and basically unknown otherwise. Then, in the 90s thanks to the work of Berners-Lee, the World Wide Web came to existence, changing the whole world. Maybe its most appealing feature is that the Web is _on-demand_: the users receive what they want when they want. Also, it's easy for everyone to publish things on the Web, both practically and economically.
+
+---
 
 ## 2.2.1 Overview of HTTP
 
@@ -109,6 +113,8 @@ A **Web page** consists of objects (html files, JPEG images, video clips, etc). 
 Has _[www.school.edu](http://www.school.edu)_ as the hostname and _/dep/pic.gif_ for the pathname.
 
 HTTP uses TCP as its transport protocol. The server doesn't store any information about the client. So, for example, it has no way to know if a client has already requested an object. Because of this, HTTP is said to be a **stateless protocol**.
+
+---
 
 ## 2.2.2 Non-Persistent and Persistent Connections
 
@@ -131,6 +137,8 @@ Non-persistent connections put the server under a lot of stress, since brand-new
 
 With persistent connections, the server leaves the TCP connection open after sending a response, usually closing it after it isn't used for a certain amount of time. An entire Web page, and event multiple Web pages - if they are on the same server - can be sent over a simple TCP connection.
 
+---
+
 ## 2.2.3 HTTP Message Format
 
 HTTP specifications include the definition of the two types of HTTP messages: request message and response message.
@@ -145,9 +153,9 @@ HTTP specifications include the definition of the two types of HTTP messages: re
 
 The message is written in ASCII text. The first line of the message is called the **request line**, the subsequent ones are called the **header lines**. The request line has three fields:
 
-1. the method, which can take on several values: GET, POST, HEAD, PUT, DELETE.
-2. the URL
-3. the HTTP version
+1. the **method**, which can take on several values: GET, POST, HEAD, PUT, DELETE.
+2. the **URL**
+3. the **HTTP version**
 
 The header line *Host: \*\* specifies the host on which the object resides, required for the Web proxy cache. With the *Connection: close* the browser is telling the server to use a non-persistent connection. The *User-Agent\* specifies the type of browser that is making the request. Finally, the Accept-Language indicates the user's language preference; this is one of the many content negotiation headers available in HTTP. Let's look to a more general format of the request message, which follows the example, except for the entity body. The entity body is empty with the GET method, but is used with the POST method to pass the information the user wrote into, for example, a form.
 
@@ -169,11 +177,13 @@ It has three sections: the **status line**, six **header lines** and then the **
 
 The status code and the associated staus message indicate the result of the request. Here some common ones:
 
-- 200 OK: request succed and information is returned in the response
-- 300 Moved Permanently: requested objected has been moved. An additional **Location:** header is specified, which the client will automatically use.
-- 400 Bad Request: a generic error code
-- 404 Not Found: the requested object does not exist
-- 505 HTTP Version Not Supported: the requested HTTP version is not supported by the server
+- **200 OK**: request succed and information is returned in the response
+- **300 Moved Permanently**: requested objected has been moved. An additional **Location:** header is specified, which the client will automatically use.
+- **400 Bad Request**: a generic error code
+- **404 Not Found**: the requested object does not exist
+- **505 HTTP Version Not Supported**: the requested HTTP version is not supported by the server
+
+---
 
 ## 2.2.4 User-Server Interaction: Cookies
 
@@ -187,8 +197,11 @@ An HTTP server is **stateless**. This vastly simplifies the server design and pe
 Suppose Susan, who always accesses the Web using Mozilla Firefox contacts _amazon.com_ for the first time. When the request comes into the Amazon's Web server, the server creates an identification number and an entry in its back-end database with that id. In the response message, it then attach:
 
 > Set-cookie: 1678 _(example of a possible id number)_
-> When Susan receives the message, her browser sees the header line and appens to the special cookie file the hostname of the server and the id number. Every time she accesses the Amazon server, the browser will automatically include in the request message:
+
+When Susan receives the message, her browser sees the header line and appens to the special cookie file the hostname of the server and the id number. Every time she accesses the Amazon server, the browser will automatically include in the request message:
+
 > Cookie: 1678
-> In this way, Amazon can offer users some services based on the user's sessions, like a shopping cart. Although cookies simplify and enhance the internet experience, they are quite controversial as they can be considered an invasion of privacy.
+
+In this way, Amazon can offer users some services based on the user's sessions,like a shopping cart. Although cookies simplify and enhance the internet experience, they are quite controversial as they can be considered an invasion of privacy.
 
 ## 2.2.5 Web Caching
