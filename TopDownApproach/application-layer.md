@@ -150,3 +150,45 @@ The message is written in ASCII text. The first line of the message is called th
 3. the HTTP version
 
 The header line *Host: \*\* specifies the host on which the object resides, required for the Web proxy cache. With the *Connection: close* the browser is telling the server to use a non-persistent connection. The *User-Agent\* specifies the type of browser that is making the request. Finally, the Accept-Language indicates the user's language preference; this is one of the many content negotiation headers available in HTTP. Let's look to a more general format of the request message, which follows the example, except for the entity body. The entity body is empty with the GET method, but is used with the POST method to pass the information the user wrote into, for example, a form.
+
+### HTTP Response Message
+
+Let's see an example of an HTTP response message, which could be the response of the previous request message.
+
+> HTTP/1.1 200 OK
+> Connection: close
+> Date: Tue, 09 Aug ...
+> Server: Apache/2.2.3 (CentOs)
+> Last-Modified: Tue, Aug 09 ...
+> Content-Length: 6821
+> Content-Type: text/html
+
+    [data]
+
+It has three sections: the **status line**, six **header lines** and then the **entity body**. The entity body is the meat of the message, as it contains the requested object. The status line has three fields: the **protocol version**, a **statu code** and a **status message**. In this example, the statuse line indicates the server is using HTTP/1.1 and that everything is OK (file found and sent).
+
+The status code and the associated staus message indicate the result of the request. Here some common ones:
+
+- 200 OK: request succed and information is returned in the response
+- 300 Moved Permanently: requested objected has been moved. An additional **Location:** header is specified, which the client will automatically use.
+- 400 Bad Request: a generic error code
+- 404 Not Found: the requested object does not exist
+- 505 HTTP Version Not Supported: the requested HTTP version is not supported by the server
+
+## 2.2.4 User-Server Interaction: Cookies
+
+An HTTP server is **stateless**. This vastly simplifies the server design and permitted engineers to develop big performance Web servers. However, web sites often wants to identify users, to serve content as a function of user's identity. HTTP uses **cookies** to allow sites to keep track of users. Cookie technology has 4 components
+
+- a cookie header line in the **response** message
+- a cookie header line in the **request** message
+- a cookie file kept on the user's end system and managed by the user's browser
+- a back-end database at the Web site
+
+Suppose Susan, who always accesses the Web using Mozilla Firefox contacts _amazon.com_ for the first time. When the request comes into the Amazon's Web server, the server creates an identification number and an entry in its back-end database with that id. In the response message, it then attach:
+
+> Set-cookie: 1678 _(example of a possible id number)_
+> When Susan receives the message, her browser sees the header line and appens to the special cookie file the hostname of the server and the id number. Every time she accesses the Amazon server, the browser will automatically include in the request message:
+> Cookie: 1678
+> In this way, Amazon can offer users some services based on the user's sessions, like a shopping cart. Although cookies simplify and enhance the internet experience, they are quite controversial as they can be considered an invasion of privacy.
+
+## 2.2.5 Web Caching
