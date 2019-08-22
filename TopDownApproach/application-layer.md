@@ -205,3 +205,30 @@ When Susan receives the message, her browser sees the header line and appens to 
 In this way, Amazon can offer users some services based on the user's sessions,like a shopping cart. Although cookies simplify and enhance the internet experience, they are quite controversial as they can be considered an invasion of privacy.
 
 ## 2.2.5 Web Caching
+
+A Web Cache - also called a proxy server - is a network entity that satisfy requests on behalf of a Web server. The cache has its own disk storage where it keeps copies of recently requested objects. An user's browser can first direct his requestes to the Web cache. As an example, suppose the request for
+
+> http://school.edu/picture.gif
+
+1. The browser establishes a TCP connection to the Web cache and sends the request
+2. The cach checks to see it it as a copy of the object. If it does, it returns the object in an HTTP response
+3. If it doesn't, the Web cache opens a TCP connection with the origin server and sends the former request.
+4. When the cache receives the object, it stores a copy in its storage and sends a copy to the browser
+
+Note that a cache is both a server and a client. Web caching has seen a development in the Internet for two reasons:
+
+1. It reduces the response time for a client request
+2. It reduces traffic on an institution's access link to the internet, allowing the institution to not upgrade the bandwith as quickly as it should
+
+Through the use of **Content Distribution Networks** (CDNs), Web caches are increasingly playing an important role. CDNs installed many distributed caches through the internet, thus localizing the traffic.
+
+---
+
+## 2.2.6 The Condition GET
+
+Although caching can reduce user-perceived response time, in introduces a new problem: the copy of an object stored in the cache may be stale; that is, the object may have been modified in the Web server. Conditional GET is the HTTP machanism that allows the cache to verify that his objects are up to date. A request is a conditional GET if:
+
+- the request message uses the GET method
+- the request message includes the GET an **If-Modified-Since** header line
+
+If the object has not been modified, the Web server sends a response with `304 Not Modified` as its status code and message, and an empty entity body.
