@@ -232,3 +232,40 @@ Although caching can reduce user-perceived response time, in introduces a new pr
 - the request message includes the GET an **If-Modified-Since** header line
 
 If the object has not been modified, the Web server sends a response with `304 Not Modified` as its status code and message, and an empty entity body.
+
+# 2.3 File Transfer: FTP
+
+In a typical FTP server, the user is sitting in front of one host (the local one) and wants to transfer file from or to a remote host. He has to provide authorization information (his identity and password), and then he can transfer files. HTTP and FTP are both files transfer protocols and have many things in common: for example, they both run on top of TCP.
+The most striking difference is that FTP uses two parallel TCP connection to transfer a file: a **control connection** and a **data connection**. THe control connection is used for sending control information such as user identification, password, commands to change remote directory, and commands to "put" or "get" files. The data connection is used to actually send a file.
+Because of this mechanism, FTP is said to send its control information **out-of-band**. HTTP sends it **in-band**. The FTP default port number is \*_port 21_. For every requested file, FTP open a new data connection, while the control connection stays open throughout the user session.
+FTP needs to mantain state about the user, as the server needs to associate the control connection with the user; this reduce the number of possible connections that an FTP server can mantain.
+
+# 2.4 Electronic Mail in the Internet
+
+Electronic mail has been around since the beginning of the Internet, being its most popular application in its infancy, and still being one of the most utilized applications.
+As with postal mail, e-mail is an asynchrnous communication medium - people send and read messages when its convenient for them, without having to coordinate with the other persone (like with telephonic communication).
+The Internet mail system has three major components:
+
+- **user agents**
+- **mail server**
+- **Simple Mail Transfer Protocol (SMTP)**
+
+Let's examine there components in the context of Alice sending an e-mail message to Bob. User Agents allow user to read, reply to, forwards and compose messages (e.g. Outlook). When Alice finished composing her message, her User Agent sends the message to her mail server, where the message is placed in the server's outgoing messages queue. When Bob wants to read the message , his user agent retrieves it from his mailbox in his server. The mail server has to authenticate Bob (with username and password). If Alices's server cannot deliver mail to Bob's server, it holds the message in a message queue and attemps to transfer the message again later (every 30 minutes or so). If there is no success after several day, the server notifies the sender and removes the message from the queue.
+SMTP, the principal application-layer protocol for e-mail, has two side (client and server). Bothe client and server side of SMTP run on every mail server: when a mail server sends a mail it acts as a client; when it receives mail from other mail servers, it acts as a server.
+
+## 2.4.1 SMTP
+
+STMP, defined in **RFC 5321**, is the heart of Internet e-mail. It's much older than HTTP (RFC is from 1988, but it was around long before). Although SMTP has a lot of good qualities, it is a legacy technology with certain archaic characteristics. For example, it restricts the body of all messages to simple 7-bit ASCII, which is a bit of a pain as it require binary data to be encoded in ASCII by the sender, and decoded back by the receiver. It is important to note that SMTP doesn't use an intermediate mail server, if the sender's server is in Hong Kong and the receiver's server is in Italy, the TCP connection is a direct one. In particular, if the receiver's server is down, the message remains in the sender's mail server for new attempts and is not stored elsewhere.
+For sending an e-mail, first the client SMTP has TCP establish a connection to port 25 at the receriver's mail server; and it retries later if the receiver's server is down. Once the connection is established, the client indicates the email address of the sender and the of the recepient. After this, the client sends the message. The clients repeats this process is it has other message to send to the server, otherwise it tells TCP to clone the connection.
+
+## 2.4.2 Comparison with HTTP
+
+Both protocols are used to transfer files from one host to another, they bothe use TCP with persistent connecton. There are important differences:
+
+- HTTP is mainly a **pull protocol** (users use HTTP to pull info from the server), while SMTP is a **push protocol** (the sending server pushes the file into the receiving server).
+- As stated before, SMTP needs each message to be in 7-bit ASCII; HTTP does not impose this restriction.
+- HTTP encapsulates each object of a Web page on a HTTP response while SMTP places all objects in a simple message.
+
+## 2.4.3 Mail Message Format
+
+When Alice writes an e-mail to Bob, whe may include several peripheal headers (`FROM:`, `TO:`, `SUBJECT:`, etc). There headers are defined in **RFC 5322**, and are difference from the SMTP control commands (seen in 2.4.1).
