@@ -233,12 +233,16 @@ Although caching can reduce user-perceived response time, in introduces a new pr
 
 If the object has not been modified, the Web server sends a response with `304 Not Modified` as its status code and message, and an empty entity body.
 
+---
+
 # 2.3 File Transfer: FTP
 
 In a typical FTP server, the user is sitting in front of one host (the local one) and wants to transfer file from or to a remote host. He has to provide authorization information (his identity and password), and then he can transfer files. HTTP and FTP are both files transfer protocols and have many things in common: for example, they both run on top of TCP.
 The most striking difference is that FTP uses two parallel TCP connection to transfer a file: a **control connection** and a **data connection**. THe control connection is used for sending control information such as user identification, password, commands to change remote directory, and commands to "put" or "get" files. The data connection is used to actually send a file.
 Because of this mechanism, FTP is said to send its control information **out-of-band**. HTTP sends it **in-band**. The FTP default port number is \*_port 21_. For every requested file, FTP open a new data connection, while the control connection stays open throughout the user session.
 FTP needs to mantain state about the user, as the server needs to associate the control connection with the user; this reduce the number of possible connections that an FTP server can mantain.
+
+---
 
 # 2.4 Electronic Mail in the Internet
 
@@ -253,10 +257,14 @@ The Internet mail system has three major components:
 Let's examine there components in the context of Alice sending an e-mail message to Bob. User Agents allow user to read, reply to, forwards and compose messages (e.g. Outlook). When Alice finished composing her message, her User Agent sends the message to her mail server, where the message is placed in the server's outgoing messages queue. When Bob wants to read the message , his user agent retrieves it from his mailbox in his server. The mail server has to authenticate Bob (with username and password). If Alices's server cannot deliver mail to Bob's server, it holds the message in a message queue and attemps to transfer the message again later (every 30 minutes or so). If there is no success after several day, the server notifies the sender and removes the message from the queue.
 SMTP, the principal application-layer protocol for e-mail, has two side (client and server). Bothe client and server side of SMTP run on every mail server: when a mail server sends a mail it acts as a client; when it receives mail from other mail servers, it acts as a server.
 
+---
+
 ## 2.4.1 SMTP
 
 STMP, defined in **RFC 5321**, is the heart of Internet e-mail. It's much older than HTTP (RFC is from 1988, but it was around long before). Although SMTP has a lot of good qualities, it is a legacy technology with certain archaic characteristics. For example, it restricts the body of all messages to simple 7-bit ASCII, which is a bit of a pain as it require binary data to be encoded in ASCII by the sender, and decoded back by the receiver. It is important to note that SMTP doesn't use an intermediate mail server, if the sender's server is in Hong Kong and the receiver's server is in Italy, the TCP connection is a direct one. In particular, if the receiver's server is down, the message remains in the sender's mail server for new attempts and is not stored elsewhere.
 For sending an e-mail, first the client SMTP has TCP establish a connection to port 25 at the receriver's mail server; and it retries later if the receiver's server is down. Once the connection is established, the client indicates the email address of the sender and the of the recepient. After this, the client sends the message. The clients repeats this process is it has other message to send to the server, otherwise it tells TCP to clone the connection.
+
+---
 
 ## 2.4.2 Comparison with HTTP
 
@@ -266,6 +274,119 @@ Both protocols are used to transfer files from one host to another, they bothe u
 - As stated before, SMTP needs each message to be in 7-bit ASCII; HTTP does not impose this restriction.
 - HTTP encapsulates each object of a Web page on a HTTP response while SMTP places all objects in a simple message.
 
+---
+
 ## 2.4.3 Mail Message Format
 
 When Alice writes an e-mail to Bob, whe may include several peripheal headers (`FROM:`, `TO:`, `SUBJECT:`, etc). There headers are defined in **RFC 5322**, and are difference from the SMTP control commands (seen in 2.4.1).
+
+---
+
+## 2.4.4 Mail Access Protocol
+
+Once SMTP delivers the message from Alices's mail server to Bob's mail server, the message is stored in Bob' mailbox. Until now we assumed Bob reads the message by loggin onto the server: this may have been true until the ealy 1990s, but nowadays users read mails from a client that runs on the user's end system.
+It would be natural to think of placingalso the server on the user's end system, but this would require the system to be always on and connected to the Internet. Typically, a user runs a User Agent on hi PC and accesses its mailbox stored on an always-on machine. Even the sender doesn't typically interact directly with the server, but with its user agent that sends the message to the server, so that it can try to send the message several times if the recepient's server is not available. But how does Bob's user agent obtain the messages stored in another host? We've seen that SMTP is a push protocol, but this is a pull procedure. Special **mail access protocols** were introduced, such as **Post Office Procol - Version 3** (**POP3**), **Internet Mail Access Protocol** (**IMAP**) and **HTTP**.
+
+---
+
+### POP3
+
+POP3, defined in RFC 1939, is a simple mail access protocol, with limited functionality. It begins when the user agent (U.A.) opens a TCP connection to the mail server at port 110. When the connection is established, it progresses through three phases:
+
+1. **Authorization**: The U.A. sends a username and a password (in the clear) to authenticate the user. It has two principal commands:
+   `USER <username>`
+   `PASS <password>`
+2. **Transaction**: a U.A. can be configured to _download and delete_ or to _download and keep_. The sequence of commands depends on this choiche. In the download-and-delete the U.A. cill issue the `list`, `retr` and `dele` commands ( + `quit` to close the connection). A problem with this mode raises ehn the user wants to read his mail from several clients (work, home, mobile), as the messages will be partitioned through the devices. In the download-and-keep mode, POP3 leaves the messages on the mail server.
+3. **Update**: the U.A. can mark messages for delition, remove delition marks, and obtain mail statistics
+
+Server replies with `-OK` and `-ERR`.
+
+---
+
+### IMAP
+
+With POP3, once Bob downloaded his messages, he can create mail folders and organize his messages, but this is again a problem with multiple devices as he should do the same for every end system. A folder hierarchy on a remote server would definetely be better.
+IMAP, defined in **RFC 3501** was invented. An IMAP server, associate each message with a folder (by default in the INBOX folder). The user can then move the message to another folder, read it, delete it, etc. Unlike POP3, IMAP has to maintain user state information - e.g. the name of user-created folders.
+
+---
+
+### Web-Based E-Mail
+
+Firstly introduced by Hotmail in the mid 1980s, it is now provided by several others like Google and Yahoo!. The U.A. is the browser and user communicates with the mail server via HTTP.
+
+---
+
+# 2.5 DNS - The Internet's Directory Service
+
+Just as humans can be identified in many ways (birth certificate name, social security number, driver's license number, etc) so too can Internet hosts:
+
+- **by hostname**: hostnames (e.g. cnn.com) are mnemonic and appreciated by humans
+- **by IP address**: an IP address consists of four bytes and has a rigid hierachical structure, because as we scan the address from left to right, we obtain more and more specific information about where the host is located
+
+---
+
+## 2.5.1 Services Provided by DNS
+
+IN order to reconcile human's and machine's preferences, we need a directory service that translate hostnames to IP addresses. This is the main task of the Internet's **Domain Name System** (**DNS**). The DNS is :
+
+- a distributed database implemented in DNS servers
+- an application-layer protocol that allows host to query the database
+
+When a browser requests the URL `www.school.edu/index.html`, the user's host must obtain the IP address.
+
+1. The user machine runs the client side of DNS
+2. The browser extracts the hostname, `www.school.edu`, and passes it to the client side of DNS
+3. The DNS client sends a query with the hostname to the DNS server
+4. The DNS client receives the reply with the IP Address
+5. The browser can start a TCP connection using the IP Address
+
+DNS adds an additional delay to the applications that use it. DNS prodives other important services:
+
+- **host aliasing**: a host with a complicated **canonical hostname** can have one or more host aliases
+- **mail server aliasing**: e-mail addresses need to be mnemonical. DNS can be invoked by a mail application to obtain the canonical hostname for a supplied alias hostname. The MX record permits a company mail server and Web server to have identical (aliased) hostnames
+- **load distribution**: big and busy sites are replicated to multiple server: each running on different systems with different IP addresses. A set of addresses is thus associated, contained in the DNS database. During a request, DNS responds with the entire set but rotates the orider (client will typically request the first).
+
+DNS is specifies in **RFC 1034** and **RFC 1035**, and updated in several other as it's a very complicated system.
+
+---
+
+## 2.5.2 Overview of How DNS Works
+
+Suppose that some application needs to translate a hostname to an IP address. The application will invoke the DNS client, which will then take over and send a query message into the network. DNS messages are sent within **UDP datagrams** on **port 53**. After a delay, client DNS receives a message with the desired mapping, that is passed to the application. While to the application DNS is a simple black box that translate hostanmes, its implementation is very complex.
+
+A simple design for DNS would have one DNS server that contains all the mappings. The problems are:
+
+- **a single point of failure**: if the DNS server crashes, so does the entire Internet.
+- **traffic volumes**: a single DNS server would have to handle all of the DNS queries ( from hundred of million of hosts)
+- **maintenance**: the server would have to keep record fo all the Internet hosts, updating them to account for every new host
+
+---
+
+### A Distributed, Hierarchical Database
+
+In order to deal with the issue of scale, DNS uses a large number of server, organized in a hierachical fashion and distributed around the world. There are three classes of DNS server:
+
+- **root servers**: in the Internet there are 13 root server, mostly located in N.A. For security and reliability purposes, each server really is a network of servers.
+- **top-level domain** (**TLD**) **server**: responsible for TLD such as com, org, net, edu and all of the country TLD like fr, it, uk, jp.
+- _authorative DNS servers_: every organization with publicy accessible hosts must proved DNS records that map those hosts to IP addresses (e.g. universities usually maintain an authoritative server).
+  There is another important type: the **local DNS server**, even though it does not belong to the hierarchy. Each ISP - such as an university or a residential ISP - has a local DNS server. Whean a host connects to an ISP, the ISP provides the host with the IP address of its local DNS server(s).
+  Let's take a look at a simple example:
+- `cis.poly.edu` wants the IP address of `gaia.cs.umass.edu`. Suppose that their respectives local DNS server are `dns.poly.edu` and `dns.umass.edu`.
+- the host `cis.poly.edu` first sends a request to its local DNS server, `dns.poly.edu`, with the desired hostname.
+- the local DNS server forwards the query to a root server
+- the root server takes not of the `edu` suffix and returns to the local server a list of IP addresses for TLF servers responsbile for `edu`.
+- the local server resends the query to one of these TLD
+- TLD server takes note of the `umass.edu` suffix and responds with the IP address of the authorative server for the University of Massachussetts, namely `dns.umass.edu`
+- the local server sends the query to to `dns.umass.edu`, which responds with the IP address of `gaia.cs.umass.edu`
+
+Note that to obtain one IP address four pairs of query/reply were needed. DNS cachin will reduce this traffic.
+
+---
+
+### DNS Caching
+
+DNS extensively exploits DNS caching to improve the delay perfomance and to reduce the number of DNS messages. When a DNS server receives a DNS reply, it caches the mapping in its local memory. If a hostname/IP address is cached and another query arrives for the same hostname, the DNS server can immediately provide the IP address, without relying on the DNS hierarchy. DNS servers dischard information after a period of time (usually 2 days) beacuse mappings aren't permaments.
+
+---
+
+## 2.5.3 DNS Records and Messages
