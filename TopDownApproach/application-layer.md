@@ -390,3 +390,39 @@ DNS extensively exploits DNS caching to improve the delay perfomance and to redu
 ---
 
 ## 2.5.3 DNS Records and Messages
+
+The DNS servers store **resource records** (**RR**s). A resource record is a four tuple that contains the following fields:
+
+> (Name, Value, Type, TTL)
+> **TT:** (time-to-live) determines when a resource should be removed from cache. The meanings of **Name** and **Type** depend on Type:
+
+- **Type = A** : Name is a hostname and Value is the IP Address for the hostname
+- **Type = NS**: Name is a domain and Value is the hostname of the authorative DNS that know how to obtain the IP Address of that domain
+- **Type = CNAME**: Value is the canonical hostname for the alias hostname Name
+- **Type = MX**: Value is the canonical name of a mail server with an alias hostname Name
+
+If A DNS server is authorative for a particural hostname it will contain a Type A record for the hostname. If a server is not authorative for a hostname, it will contain a Type NS recordo for the domain that include the domain, and a Type A record that provide an IP Address of the server in the Value field of the NS record. Suppose a DNS is not authorative server for `gaia.cs.umass.edu`. This server will contain a record like `(umass.edu, dns.umass.edu, NS)` and also a `(dns.umass.edu, 128.119.40.111, A)`.
+
+---
+
+### DNS Messages
+
+There are two kinds of DNS Messages: query and reply messages. The two have the same format:
+
+- The first 12 bytes is the header section, which has many fields
+  - 16-bit number that identifies the query, allowing the client to match requests and replies
+  - 1-bit query (0) or reply (1) flag
+  - 1-bit authorative flag
+  - 1-bit recursion-desired flag (set by the client)
+  - 1-bit recursion available (set by the server)
+
+The are also four number-of fields, indicating the number of occurencies of the four types of data section that follow the header
+
+- The question section contains information about the query:
+  1. a name field contains the name that is being queried
+  2. a type field indicates the type of record being asked
+- The answer section contains the resource records for the name queried
+- The authority section contains records of other authorative servers
+- The additional section contain other helpful records
+
+---
